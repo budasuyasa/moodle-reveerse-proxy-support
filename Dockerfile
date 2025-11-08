@@ -2,7 +2,7 @@ FROM php:8.3-apache
 
 # --- Install dependencies ---
 RUN apt-get update && apt-get install -y \
-  git unzip libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev libzip-dev libicu-dev ghostscript \
+  netcat-openbsd git unzip libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev libzip-dev libicu-dev ghostscript \
   libonig-dev libcurl4-openssl-dev libxslt1-dev libmagickwand-dev supervisor vim \
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install gd mysqli zip intl opcache soap xsl xml mbstring curl exif pdo pdo_mysql \

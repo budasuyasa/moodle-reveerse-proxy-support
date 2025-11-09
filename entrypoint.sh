@@ -24,7 +24,6 @@ if [ ! -f /var/www/html/config.php ]; then
   sed -i "s|\$CFG->dataroot.*|\$CFG->dataroot = '/var/www/moodledata';|" /var/www/html/config.php
   sed -i "s|\$CFG->directorypermissions.*|\$CFG->directorypermissions = 0777;|" /var/www/html/config.php
 
-  sed -i "/require_once/d" /var/www/html/config.php
   echo "\$CFG->reverseproxy = filter_var(getenv('MOODLE_REVERSEPROXY'), FILTER_VALIDATE_BOOLEAN);" >>/var/www/html/config.php
   echo "\$CFG->sslproxy = filter_var(getenv('MOODLE_SSLPROXY'), FILTER_VALIDATE_BOOLEAN);" >>/var/www/html/config.php
   echo "\$CFG->lang = '${MOODLE_LANG:-en}';" >>/var/www/html/config.php

@@ -98,7 +98,7 @@ labels:
 
 Pastikan Anda juga menambahkan networks coolify:
 
-```
+```yaml
 networks:
   moodle_net:
     driver: bridge

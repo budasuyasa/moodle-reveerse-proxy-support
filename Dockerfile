@@ -2,35 +2,40 @@ FROM php:8.3-apache
 
 # --- Install dependencies ---
 RUN apt-get update && apt-get install -y \
-  netcat-openbsd git unzip libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev libzip-dev libicu-dev ghostscript \
-  libonig-dev libcurl4-openssl-dev libxslt1-dev libmagickwand-dev supervisor vim \
+  git unzip libpng-dev libjpeg-dev libfreetype6-dev libxml2-dev libzip-dev libicu-dev ghostscript \
+  libonig-dev libcurl4-openssl-dev libxslt1-dev libmagickwand-dev supervisor netcat-openbsd \
   && docker-php-ext-configure gd --with-freetype --with-jpeg \
   && docker-php-ext-install gd mysqli zip intl opcache soap xsl xml mbstring curl exif pdo pdo_mysql \
+  && pecl install imagick \
+  && docker-php-ext-enable imagick \
   && rm -rf /var/lib/apt/lists/*
 
-# --- Enable Apache Rewrite module ---
-RUN a2enmod rewrite
+# --- Enable Apache rewrite and set DocumentRoot to /public ---
+RUN a2enmod rewrite \
+  && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
+  && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
 
-# --- PHP settings ---
-RUN echo "upload_max_filesize=128M" > /usr/local/etc/php/conf.d/uploads.ini && \
-  echo "post_max_size=128M" >> /usr/local/etc/php/conf.d/uploads.ini && \
-  echo "max_input_vars=5000" >> /usr/local/etc/php/conf.d/uploads.ini && \
-  echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/uploads.ini
+# --- PHP configs ---
+RUN echo "upload_max_filesize=128M" > /usr/local/etc/php/conf.d/uploads.ini \
+  && echo "post_max_size=128M" >> /usr/local/etc/php/conf.d/uploads.ini \
+  && echo "max_input_vars=5000" >> /usr/local/etc/php/conf.d/uploads.ini \
+  && echo "memory_limit=512M" >> /usr/local/etc/php/conf.d/uploads.ini
 
-# --- Moodle setup ---
-ENV MOODLE_VERSION=MOODLE_501_STABLE
+# --- Environment defaults ---
+ENV MOODLE_VERSION=MOODLE_501_STABLE \
+  MOODLE_DATA=/var/www/moodledata
+
+# --- Download Moodle ---
 WORKDIR /var/www/html
+RUN git clone --branch ${MOODLE_VERSION} --depth 1 https://github.com/moodle/moodle.git . \
+  && mkdir -p /var/www/moodledata \
+  && chown -R www-data:www-data /var/www/html /var/www/moodledata
 
-RUN git clone --branch ${MOODLE_VERSION} --depth 1 https://github.com/moodle/moodle.git . && \
-  mkdir -p /var/www/moodledata && \
-  chown -R www-data:www-data /var/www/html /var/www/moodledata
-
-# --- Copy entrypoint and supervisor config ---
+# --- Copy entrypoint & supervisor config ---
 COPY entrypoint.sh /entrypoint.sh
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
-
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]

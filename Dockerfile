@@ -13,7 +13,7 @@ RUN a2enmod rewrite headers ssl
 # Configure PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
   docker-php-ext-install -j$(nproc) \
-  gd intl mysqli opcache soap xmlrpc xml zip ldap xsl
+  gd intl mysqli opcache soap xml zip ldap xsl
 
 # PHP settings
 RUN echo "upload_max_filesize = 128M" > /usr/local/etc/php/conf.d/uploads.ini && \

@@ -1,24 +1,41 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Moodle base container..."
+echo "⏳ Waiting for database ${MOODLE_DATABASE_HOST}:${MOODLE_DATABASE_PORT_NUMBER}..."
+until nc -z -v -w30 "$MOODLE_DATABASE_HOST" "$MOODLE_DATABASE_PORT_NUMBER"; do
+  echo "   Database not ready, retrying..."
+  sleep 5
+done
+echo "✅ Database is ready."
 
-# Optional: wait for DB if user provided env
-if [ -n "${MOODLE_DATABASE_HOST}" ]; then
-  echo "⏳ Waiting for database ${MOODLE_DATABASE_HOST}:${MOODLE_DATABASE_PORT_NUMBER:-3306}..."
-  until nc -z "$MOODLE_DATABASE_HOST" "${MOODLE_DATABASE_PORT_NUMBER:-3306}"; do
-    echo "   Database not ready, retrying..."
-    sleep 5
-  done
-  echo "✅ Database reachable."
-else
-  echo "⚠️ No database host specified. Skipping DB wait."
+# --- Pastikan permission awal aman ---
+chown -R www-data:www-data /var/www/html /var/www/moodledata
+
+# --- Jalankan instalasi hanya jika belum ada config.php ---
+if [ ! -f /var/www/html/config.php ]; then
+  echo "🚀 Installing Moodle..."
+  php admin/cli/install.php \
+    --lang=${MOODLE_LANG:-en} \
+    --wwwroot=${MOODLE_HOST} \
+    --dataroot=/var/www/moodledata \
+    --dbtype=${MOODLE_DATABASE_TYPE:-mysql} \
+    --dbhost=${MOODLE_DATABASE_HOST:-moodle-db} \
+    --dbname=${MOODLE_DATABASE_NAME:-moodle} \
+    --dbuser=${MOODLE_DATABASE_USER:-moodle} \
+    --dbpass=${MOODLE_DATABASE_PASSWORD:-moodlepass} \
+    --fullname="${MOODLE_SITE_NAME:-Moodle LMS}" \
+    --shortname="${MOODLE_SITE_SHORTNAME:-Moodle}" \
+    --adminuser=${MOODLE_USERNAME:-admin} \
+    --adminpass=${MOODLE_PASSWORD:-Admin123} \
+    --adminemail=${MOODLE_EMAIL:-admin@example.com} \
+    --agree-license \
+    --non-interactive || true
+
+  echo "✅ Installation complete."
 fi
 
-# Fix permissions
-chown -R www-data:www-data /var/www/html /var/www/moodledata || true
-chmod -R 775 /var/www/moodledata || true
+# --- Pastikan file akhirnya dimiliki www-data ---
+chown -R www-data:www-data /var/www/html /var/www/moodledata
 
-# Start Apache + cron
-echo "🧭 Starting supervisord..."
+# --- Jalankan supervisord (Apache + cron) ---
 exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

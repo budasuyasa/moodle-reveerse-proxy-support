@@ -5,13 +5,15 @@ services:
       dockerfile: Dockerfile
     container_name: moodle
     restart: always
+    ports:
+      - 8989:80
     env_file:
       - .env
     volumes:
       - moodle_data:/var/www/moodledata
     networks:
       - moodle_net
-      - coolify
+      # - coolify
     labels:
       traefik.enable: "true"
       traefik.http.routers.moodle.rule: "Host(`${MOODLE_HOST}`)"
@@ -47,5 +49,5 @@ volumes:
 networks:
   moodle_net:
     driver: bridge
-  coolify:
-    external: true
+  #coolify:
+  #  external: true

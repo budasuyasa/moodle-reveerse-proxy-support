@@ -27,6 +27,20 @@ WORKDIR /var/www/html
 ARG MOODLE_VERSION=MOODLE_501_STABLE
 RUN git clone -b ${MOODLE_VERSION} --depth=1 https://github.com/moodle/moodle.git /var/www/html
 
+# --- Apache Config ---
+RUN echo "<VirtualHost *:80>\n\
+  ServerAdmin webmaster@localhost\n\
+  DocumentRoot /var/www/html/public\n\
+  <Directory /var/www/html/public>\n\
+  Options Indexes FollowSymLinks\n\
+  AllowOverride All\n\
+  Require all granted\n\
+  </Directory>\n\
+  ErrorLog \${APACHE_LOG_DIR}/error.log\n\
+  CustomLog \${APACHE_LOG_DIR}/access.log combined\n\
+  </VirtualHost>" > /etc/apache2/sites-available/000-default.conf && \
+  a2enmod rewrite headers ssl
+
 # Create data directory
 RUN mkdir -p /var/www/moodledata && chown -R www-data:www-data /var/www && chmod -R 775 /var/www
 

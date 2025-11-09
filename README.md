@@ -71,6 +71,13 @@ docker compose up -d
 
 ```
 
+Setelah container berjalan, proses instalasi akan otomatis dilakukan. Pantau proses instalasi,
+pastikan tidak ada error dari moodle CLI installer.
+
+```bash
+docker logs moodle -f
+```
+
 ### Deploy dengan Coolify
 
 Anda menggunakan coolify? tambahkan container labels berikut pada service `moodle` untuk reverse proxy dan auto https:
@@ -82,18 +89,18 @@ networks:
  - coolify
 
 labels:
-  - traefik.enable=true
-  - traefik.docker.network=coolify
-  - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-  - traefik.http.middlewares.gzip.compress=true
-  - traefik.http.routers.moodle-http.entryPoints=http
-  - traefik.http.routers.moodle-http.rule=Host(`your-domain.com`)
-  - traefik.http.routers.moodle-http.middlewares=redirect-to-https
-  - traefik.http.routers.moodle-https.entryPoints=https
-  - traefik.http.routers.moodle-https.rule=Host(`your-domain.com`)
-  - traefik.http.routers.moodle-https.middlewares=gzip
-  - traefik.http.routers.moodle-https.tls.certresolver=letsencrypt
-  - traefik.http.services.moodle.loadbalancer.server.port=80
+  traefik.enable: "true"
+  traefik.docker.network: "coolify"
+  traefik.http.middlewares.redirect-to-https.redirectscheme.scheme: "https"
+  traefik.http.middlewares.gzip.compress: "true"
+  traefik.http.routers.moodle-http.entryPoints: "http"
+  traefik.http.routers.moodle-http.rule: "Host(`yourdomain.com`)"
+  traefik.http.routers.moodle-http.middlewares: "redirect-to-https"
+  traefik.http.routers.moodle-https.entryPoints: "https"
+  traefik.http.routers.moodle-https.rule: "Host(`yourdomain.com`)"
+  traefik.http.routers.moodle-https.middlewares: "gzip"
+  traefik.http.routers.moodle-https.tls.certresolver: "letsencrypt"
+  traefik.http.services.moodle.loadbalancer.server.port: "80"
 ```
 
 Pastikan Anda juga menambahkan networks coolify:

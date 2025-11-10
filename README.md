@@ -1,16 +1,16 @@
-# Moodle Reverse Proxy Ready
+# Moodle Reverse Proxy Support
+
+Docker image untuk Moodle. Dengan versi yang bisa dikonfigurasi dan dilengkapi dukungan reverse proxy. Menggunakan `php8.3-apache` sebagai base image dan
+Moodle versi `501 STABLE`.
 
 ## ✨ Fitur
 
-- Mudah untuk dideploy, tinggal build dan run. TLRDR, hanya perlu `docker compose up -d`
-- **Moodle 5.0.1** (MOODLE_501_STABLE branch), Anda bisa ganti versi moodle dengan yang Anda inginkan
-- **PHP 8.3** dengan Apache
-- **MariaDB 10.11** sebagai database (optional)
-- **Reverse Proxy Ready** - Full support automatic HTTPS
-- **Ghostscript** - Untuk PDF annotation support
-- **Environment-based Configuration** - Mudah dikonfigurasi via `.env` file
+- Mudah untuk dideploy, tinggal build dan run. TL;RDR;  `docker compose up -d`
+- **Moodle 5.0.1** (`MOODLE_501_STABLE` branch), bisa disesuaikan dengan branch 501+.
+- **Environment-based Configuration** - Mudah disesuaikan via `.env` file
 - **Auto SSL Proxy Detection** - Mendukung X-Forwarded-Proto header
 - **Optimized PHP Settings** - Pre-configured untuk performa optimal
+- **Auto install** - Proses instalasi otomatis via `admin/cli/install.php`. Tidak perlu melakukan instalasi manual via web UI. Cukup mendefinisikan konfigurasi pada `.env`.
 
 ## 🚀 Quick Start
 
